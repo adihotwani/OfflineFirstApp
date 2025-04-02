@@ -1,8 +1,9 @@
 import { createRxDatabase, addRxPlugin, RxCollection, RxDatabase } from 'rxdb';
-import { getRxStoragePouch, addPouchPlugin } from 'rxdb/plugins/pouchdb';
+import {
+  getRxStorageSQLiteTrial,
+  getSQLiteBasicsQuickSQLite
+} from 'rxdb/plugins/storage-sqlite';
 import { replicateCouchDB } from 'rxdb/plugins/replication-couchdb';
-import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
-import SQLite from 'pouchdb-adapter-react-native-sqlite';
 import { open } from 'react-native-quick-sqlite';
 import { uuidv4 } from 'uuid';
 
@@ -27,21 +28,23 @@ type Collections = {
 
 type Database = RxDatabase<Collections>;
 
+
+addRxPlugin(require('rxdb/plugins/update'));
+
 let database: Database;
 
 export const initDB = async () => {
   // Initialize SQLite adapter
-  const SQLiteAdapter = SQLite({
-    adapter: 'react-native-sqlite',
-    sqlitePlugin: { openDatabase: open }
-  });
+  // const SQLiteAdapter = SQLite({
+  //   adapter: 'react-native-sqlite',
+  //   sqlitePlugin: { openDatabase: open }
+  // });
 
-  addPouchPlugin(require('pouchdb-adapter-http'));
-  addRxPlugin(require('rxdb/plugins/update'));
+  
 
   const db = await createRxDatabase({
     name: 'offlinefirstdb',
-    storage: getRxStoragePouch(SQLiteAdapter),
+    storage: getRxStorageSQLiteTrial({SqliteBasics: getSQLiteBasicsQuickSQLite(open)}),
     multiInstance: false,
   });
 
@@ -90,20 +93,28 @@ export const syncWithCouchDB = async (couchDBUrl: string, dbName: string) => {
       collection: db.businesses,
       url: `${couchDBUrl}/${dbName}_businesses`,
       live: true,
-      retry: true
+      pull: {
+        retry: true  
+      },
+      push: {
+        retry: true
+      }
     }),
     articles: replicateCouchDB({
       collection: db.articles,
       url: `${couchDBUrl}/${dbName}_articles`,
       live: true,
-      retry: true
+      pull: {
+        retry: true
+      },
+      push: {
+        retry: true
+      }
     })
   };
 
   return replicationStates;
 };
-
-// ... rest of the file remains the same (getDB, generateId, CRUD helpers)
 
 export const getDB = (): Database => {
   if (!database) throw new Error('Database not initialized');

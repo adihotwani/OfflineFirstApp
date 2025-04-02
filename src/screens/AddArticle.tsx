@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { getDB, generateId } from '../database';
+import { getDB, generateId } from '../Database/index';
 import { useRoute, useNavigation } from '@react-navigation/native';
 
 const AddArticle = () => {

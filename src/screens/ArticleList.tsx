@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { getDB } from '../database';
+import { getDB } from '../Database/index';
 import { useRoute, useNavigation } from '@react-navigation/native';
 
 const ArticleList = () => {
